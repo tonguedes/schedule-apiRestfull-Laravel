@@ -22,6 +22,7 @@ class AppointmentService
             'status' => AppointmentStatus::Pending,
         ]);
 
+        // 🔹 Aqui é onde o erro estava — deve passar $appointment, não $user
         dispatch(new SendNotificationJob($appointment, 'pending'));
 
         return $appointment;
@@ -47,5 +48,17 @@ class AppointmentService
         dispatch(new SendNotificationJob($appointment, 'cancelled'));
 
         return $appointment;
+    }
+
+    public function delete($id)
+    {
+        // Correção: Usar o repositório injetado para deletar
+        // e retornar um booleano indicando sucesso.
+        return $this->repository->delete($id);
+    }
+
+    public function find($id)
+    {
+        return $this->repository->find($id);
     }
 }
