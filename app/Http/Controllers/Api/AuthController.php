@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -30,20 +32,22 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+          $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-
-        $token = $user->createToken('api_token')->plainTextToken;
-
-        return response()->json(['user' => $user, 'token' => $token]);
+    if (!Auth::attempt($credentials)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
-    public function logout(Request $request)
-    {
-        $request->user()->tokens()->delete();
-        return response()->json(['message' => 'Logged out']);
-    }
+    $user = Auth::user();
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => new UserResource($user)
+    ]);
+}
 }

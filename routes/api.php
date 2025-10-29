@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Rota para buscar um usuário específico por ID
-    Route::get('user/{id}', [\App\Http\Controllers\Api\UserController::class, 'show']);
+    Route::apiResource('user',\App\Http\Controllers\Api\UserController::class);
     
 Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
 

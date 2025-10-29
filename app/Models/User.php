@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -59,6 +60,9 @@ public function services()
     return $this->hasMany(Service::class);
 }
 
-
+public function isAdmin(): bool
+{
+    return $this->role === 'admin';
+}
     
 }

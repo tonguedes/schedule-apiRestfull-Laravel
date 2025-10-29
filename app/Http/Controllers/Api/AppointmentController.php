@@ -39,11 +39,10 @@ class AppointmentController extends Controller
         return response()->json($this->service->cancel($id));
     }
 
-    // Em app/Http/Controllers/Api/AppointmentController.php
 
 public function show($id)
 {
-    // Utiliza o método 'find' que já existe no seu serviço
+   
     $appointment = $this->service->find($id);
 
     // Retorna 404 se o agendamento não for encontrado
@@ -54,8 +53,6 @@ public function show($id)
     return response()->json($appointment);
 }
 
-
-    // ✅ Adicione este método no final
     public function destroy($id)
     {
         $this->service->delete($id);

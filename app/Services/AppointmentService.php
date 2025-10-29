@@ -52,8 +52,7 @@ class AppointmentService
 
     public function delete($id)
     {
-        // Correção: Usar o repositório injetado para deletar
-        // e retornar um booleano indicando sucesso.
+        
         return $this->repository->delete($id);
     }
 
