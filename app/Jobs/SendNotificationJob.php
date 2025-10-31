@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Appointment;
+use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,7 +24,7 @@ class SendNotificationJob implements ShouldQueue
         $this->event = $event;
     }
 
-    public function handle(): void
+    public function handle(NotificationService $notificationService): void
     {
         $user = $this->appointment->user->name ?? 'Usuário desconhecido';
         $service = $this->appointment->service->name ?? 'Serviço não informado';
@@ -32,9 +33,17 @@ class SendNotificationJob implements ShouldQueue
             'pending' => "Novo agendamento criado por {$user} para {$service}",
             'confirmed' => "Agendamento de {$user} para {$service} foi confirmado",
             'cancelled' => "Agendamento de {$user} para {$service} foi cancelado",
-            default => "Evento desconhecido para agendamento",
+            default => "Evento {$this->event} para agendamento {$this->appointment->id}",
         };
 
+        // log no arquivo
         Log::info("[NOTIFICATION] {$message}");
+
+        // gravar no banco via NotificationService
+        try {
+            $notificationService->logNotification($this->appointment, $this->event, $message);
+        } catch (\Throwable $e) {
+            Log::error('[NOTIFICATION][ERROR] ' . $e->getMessage());
+        }
     }
 }

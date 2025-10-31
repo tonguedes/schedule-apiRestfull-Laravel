@@ -3,33 +3,52 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ServiceController;
+use App\Http\Controllers\Api\AppointmentController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\NotificationController;
 
-/* Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
- */
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+| Rotas públicas e autenticadas da SmartSchedule API.
+| Estruturadas por blocos de responsabilidade.
+|--------------------------------------------------------------------------
+*/
 
-
+// ROTAS PÚBLICAS (sem autenticação)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+//  ROTAS PROTEGIDAS (usuário autenticado)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (\Illuminate\Http\Request $request) {
+
+    // Perfil do usuário autenticado
+    Route::get('/profile', function (Request $request) {
         return $request->user();
     });
+
+    // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Rota para buscar um usuário específico por ID
-    Route::apiResource('user',\App\Http\Controllers\Api\UserController::class);
-    
-Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
+    // Services (CRUD)
+    Route::apiResource('services', ServiceController::class);
 
-Route::get('appointments', [\App\Http\Controllers\Api\AppointmentController::class, 'index']);
-Route::post('appointments', [\App\Http\Controllers\Api\AppointmentController::class, 'store']);
-Route::get('appointments/{id}', [\App\Http\Controllers\Api\AppointmentController::class, 'show']);
-Route::put('appointments/{id}/confirm', [\App\Http\Controllers\Api\AppointmentController::class, 'confirm']);
-Route::put('appointments/{id}/cancel', [\App\Http\Controllers\Api\AppointmentController::class, 'cancel']);
-Route::delete('appointments/{id}', [\App\Http\Controllers\Api\AppointmentController::class, 'destroy']);
+    // Appointments (agendamentos)
+    Route::get('appointments', [AppointmentController::class, 'index']);
+    Route::post('appointments', [AppointmentController::class, 'store']);
+    Route::get('appointments/{id}', [AppointmentController::class, 'show']);
+    Route::put('appointments/{id}/confirm', [AppointmentController::class, 'confirm']);
+    Route::put('appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
+    Route::delete('appointments/{id}', [AppointmentController::class, 'destroy']);
 
+    // Notifications (histórico de notificações do usuário)
+    Route::get('notifications', [NotificationController::class, 'index']);
 
+    //ROTAS ADMINISTRATIVAS
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::apiResource('users', UserController::class);
+        // Exemplo: Route::get('services', [ServiceController::class, 'index']);
+    });
 });

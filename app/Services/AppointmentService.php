@@ -22,7 +22,6 @@ class AppointmentService
             'status' => AppointmentStatus::Pending,
         ]);
 
-        // 🔹 Aqui é onde o erro estava — deve passar $appointment, não $user
         dispatch(new SendNotificationJob($appointment, 'pending'));
 
         return $appointment;

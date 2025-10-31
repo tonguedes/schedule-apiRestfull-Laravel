@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppointmentRequest;
 use App\Services\AppointmentService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -18,14 +19,17 @@ class AppointmentController extends Controller
 
     public function store(AppointmentRequest $request)
     {
-        $data = [
-            'user_id' => $request->user()->id,
-            'service_id' => $request->service_id,
-            'date' => $request->date,
-            'time' => $request->time,
-        ];
+        $validatedData = $request->validated();
 
-        $appointment = $this->service->create($data);
+        // Combina a data e a hora em um único objeto Carbon (timestamp)
+        $appointmentTimestamp = Carbon::parse($validatedData['date'] . ' ' . $validatedData['time']);
+
+        $appointment = $this->service->create([
+            'user_id' => $request->user()->id,
+            'service_id' => $validatedData['service_id'],
+            'appointment_time' => $appointmentTimestamp,
+        ]);
+
         return response()->json($appointment, 201);
     }
 

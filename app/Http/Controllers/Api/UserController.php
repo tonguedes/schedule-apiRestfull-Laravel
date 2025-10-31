@@ -35,7 +35,12 @@ class UserController extends Controller
     // Deleta um usuário (opcional, se houver permissão)
     public function destroy($id)
     {
-        $this->service->delete($id);
-        return response()->json(['message' => 'User deleted successfully'], 200);
+        $userToDelete = $this->service->find($id);
+
+        // Adicione sua lógica de autorização aqui. Ex:
+        // $this->authorize('delete', $userToDelete);
+
+        $this->service->delete($userToDelete->id);
+        return response()->noContent();
     }
 }
