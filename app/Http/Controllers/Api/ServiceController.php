@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ServiceRequest;
+use App\Http\Resources\ServiceResource;
 use App\Repositories\ServiceRepository;
+use App\Models\Service;
 
 class ServiceController extends Controller
 {
@@ -12,7 +14,7 @@ class ServiceController extends Controller
 
     public function index()
     {
-        return response()->json($this->repository->all());
+        return ServiceResource::collection($this->repository->all());
     }
 
    public function store(ServiceRequest $request)
@@ -25,24 +27,26 @@ class ServiceController extends Controller
 
     $service = $this->repository->create($data);
 
-    return response()->json($service, 201);
+    return new ServiceResource($service);
     }
 
 
-    public function show($id)
+    public function show(Service $service)
     {
-        return response()->json($this->repository->find($id));
+        return new ServiceResource($service);
     }
 
-    public function update(ServiceRequest $request, $id)
+    public function update(ServiceRequest $request, Service $service)
     {
-        $service = $this->repository->update($id, $request->validated());
-        return response()->json($service);
+        // Adicione a lógica de autorização aqui, se necessário.
+        // $this->authorize('update', $service);
+        $updatedService = $this->repository->update($service->id, $request->validated());
+        return new ServiceResource($updatedService);
     }
 
-    public function destroy($id)
+    public function destroy(Service $service)
     {
-        $this->repository->delete($id);
-        return response()->json(null, 204);
+        $this->repository->delete($service->id);
+        return response()->noContent();
     }
 }

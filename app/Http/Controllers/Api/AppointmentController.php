@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppointmentRequest;
+use App\Http\Resources\AppointmentResource;
 use App\Services\AppointmentService;
+use App\Models\Appointment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -14,7 +16,8 @@ class AppointmentController extends Controller
 
     public function index(Request $request)
     {
-        return response()->json($this->service->listByUser($request->user()->id));
+        $appointments = $this->service->listByUser($request->user()->id);
+        return AppointmentResource::collection($appointments);
     }
 
     public function store(AppointmentRequest $request)
@@ -30,36 +33,32 @@ class AppointmentController extends Controller
             'appointment_time' => $appointmentTimestamp,
         ]);
 
-        return response()->json($appointment, 201);
+        return new AppointmentResource($appointment);
     }
 
-    public function confirm($id)
+    public function confirm(Appointment $appointment)
     {
-        return response()->json($this->service->confirm($id));
+        $confirmedAppointment = $this->service->confirm($appointment->id);
+        return new AppointmentResource($confirmedAppointment);
     }
 
-    public function cancel($id)
+    public function cancel(Appointment $appointment)
     {
-        return response()->json($this->service->cancel($id));
+        $canceledAppointment = $this->service->cancel($appointment->id);
+        return new AppointmentResource($canceledAppointment);
     }
 
 
-public function show($id)
-{
-   
-    $appointment = $this->service->find($id);
-
-    // Retorna 404 se o agendamento não for encontrado
-    if (!$appointment) {
-        return response()->json(['message' => 'Appointment not found'], 404);
-    }
-
-    return response()->json($appointment);
-}
-
-    public function destroy($id)
+    public function show(Appointment $appointment)
     {
-        $this->service->delete($id);
-        return response()->json(['message' => 'Appointment deleted successfully'], 200);
+        // Opcional: carregar relacionamentos para exibir no resource
+        $appointment->load(['user', 'service']);
+        return new AppointmentResource($appointment);
+    }
+
+    public function destroy(Appointment $appointment)
+    {
+        $this->service->delete($appointment->id);
+        return response()->noContent();
     }
 }
