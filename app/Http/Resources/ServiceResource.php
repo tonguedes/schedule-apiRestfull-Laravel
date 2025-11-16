@@ -15,11 +15,11 @@ class ServiceResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'uuid' => $this->uuid,
             'name' => $this->name,
             'description' => $this->description,
             'price' => $this->price,
-            'duration_minutes' => $this->duration_minutes,
+            'duration' => $this->duration,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

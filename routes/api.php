@@ -36,19 +36,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('services', ServiceController::class);
 
     // Appointments (agendamentos)
-    Route::get('appointments', [AppointmentController::class, 'index']);
-    Route::post('appointments', [AppointmentController::class, 'store']);
-    Route::get('appointments/{id}', [AppointmentController::class, 'show']);
-    Route::put('appointments/{id}/confirm', [AppointmentController::class, 'confirm']);
-    Route::put('appointments/{id}/cancel', [AppointmentController::class, 'cancel']);
-    Route::delete('appointments/{id}', [AppointmentController::class, 'destroy']);
+    Route::apiResource('appointments', AppointmentController::class)->except(['update']);
+    // Rotas customizadas para confirmar e cancelar
+    Route::patch('appointments/{appointment}/confirm', [AppointmentController::class, 'confirm']);
+    Route::patch('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel']);
 
     // Notifications (histórico de notificações do usuário)
     Route::get('notifications', [NotificationController::class, 'index']);
 
     //ROTAS ADMINISTRATIVAS
     Route::middleware('admin')->prefix('admin')->group(function () {
-        Route::apiResource('users', UserController::class);
-        // Exemplo: Route::get('services', [ServiceController::class, 'index']);
+        Route::apiResource('users', UserController::class)->except(['show', 'update', 'destroy']);
+        Route::apiResource('users', UserController::class)->only(['show', 'update', 'destroy']);
     });
 });

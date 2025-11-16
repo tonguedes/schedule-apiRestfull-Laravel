@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppointmentRequest;
 use App\Http\Resources\AppointmentResource;
+use App\Models\Service;
 use App\Services\AppointmentService;
 use App\Models\Appointment;
 use Carbon\Carbon;
@@ -27,9 +28,12 @@ class AppointmentController extends Controller
         // Combina a data e a hora em um único objeto Carbon (timestamp)
         $appointmentTimestamp = Carbon::parse($validatedData['date'] . ' ' . $validatedData['time']);
 
+        // Encontra o serviço pelo UUID e pega seu ID para a chave estrangeira
+        $service = Service::where('uuid', $validatedData['service_uuid'])->firstOrFail();
+
         $appointment = $this->service->create([
             'user_id' => $request->user()->id,
-            'service_id' => $validatedData['service_id'],
+            'service_id' => $service->id,
             'appointment_time' => $appointmentTimestamp,
         ]);
 

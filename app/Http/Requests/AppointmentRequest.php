@@ -14,7 +14,7 @@ class AppointmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'service_id' => 'required|exists:services,id',
+            'service_uuid' => 'required|uuid|exists:services,uuid',
             'date' => 'required|date|after_or_equal:today',
             'time' => 'required|date_format:H:i',
         ];

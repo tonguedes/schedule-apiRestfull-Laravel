@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Notifications\GenericNotification;
 use App\Models\Appointment;
 use App\Services\NotificationService;
 use Illuminate\Bus\Queueable;
@@ -9,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
 class SendNotificationJob implements ShouldQueue
@@ -27,12 +29,14 @@ class SendNotificationJob implements ShouldQueue
     public function handle(NotificationService $notificationService): void
     {
         $user = $this->appointment->user->name ?? 'Usuário desconhecido';
+        $appointmentUser = $this->appointment->user;
         $service = $this->appointment->service->name ?? 'Serviço não informado';
 
         $message = match ($this->event) {
             'pending' => "Novo agendamento criado por {$user} para {$service}",
             'confirmed' => "Agendamento de {$user} para {$service} foi confirmado",
             'cancelled' => "Agendamento de {$user} para {$service} foi cancelado",
+            'scheduled' => "Seu agendamento para o serviço {$service} foi realizado com sucesso.",
             default => "Evento {$this->event} para agendamento {$this->appointment->id}",
         };
 
@@ -44,6 +48,12 @@ class SendNotificationJob implements ShouldQueue
             $notificationService->logNotification($this->appointment, $this->event, $message);
         } catch (\Throwable $e) {
             Log::error('[NOTIFICATION][ERROR] ' . $e->getMessage());
+        }
+
+        // Envia a notificação por e-mail para o usuário
+        if ($appointmentUser) {
+            $subject = "Agendamento " . ucfirst($this->event);
+            $appointmentUser->notify(new GenericNotification($message, $subject));
         }
     }
 }

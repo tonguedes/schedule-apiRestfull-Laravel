@@ -39,11 +39,11 @@ class ServiceTest extends TestCase
             ->assertJsonStructure([     // Verifica a estrutura da resposta
                 'data' => [
                     '*' => [ // O '*' significa "cada item no array"
-                        'id',
+                        'uuid',
                         'name',
                         'description',
                         'price',
-                        'duration_minutes',
+                        'duration',
                     ]
                 ]
             ]);
@@ -55,7 +55,7 @@ class ServiceTest extends TestCase
             'name' => 'Novo Serviço',
             'description' => 'Descrição do novo serviço',
             'price' => 99.90,
-            'duration_minutes' => 60,
+            'duration' => 60,
         ];
 
         $response = $this->actingAs($this->user)->postJson('/api/services', $data);
@@ -63,7 +63,7 @@ class ServiceTest extends TestCase
         $response
             ->assertCreated() // Verifica se o status é 201
             ->assertJsonStructure([
-                'data' => ['id', 'name', 'price']
+                'data' => ['uuid', 'name', 'price']
             ])
             ->assertJsonFragment(['name' => 'Novo Serviço']);
 
@@ -79,9 +79,9 @@ class ServiceTest extends TestCase
         $service = Service::factory()->create();
 
         $this->actingAs($this->user)
-            ->getJson("/api/services/{$service->id}")
+            ->getJson("/api/services/{$service->uuid}")
             ->assertOk()
-            ->assertJsonFragment(['id' => $service->id]);
+            ->assertJsonFragment(['uuid' => $service->uuid]);
     }
 
     public function test_can_delete_a_service(): void
@@ -89,7 +89,7 @@ class ServiceTest extends TestCase
         $service = Service::factory()->create();
 
         $this->actingAs($this->user)
-            ->deleteJson("/api/services/{$service->id}")
+            ->deleteJson("/api/services/{$service->uuid}")
             ->assertNoContent(); // Verifica se o status é 204
 
         // Garante que o serviço foi removido do banco
@@ -106,7 +106,7 @@ class ServiceTest extends TestCase
         ];
 
         $this->actingAs($this->user)
-            ->putJson("/api/services/{$service->id}", $updateData)
+            ->putJson("/api/services/{$service->uuid}", $updateData)
             ->assertOk()
             ->assertJsonFragment([
                 'name' => 'Serviço Atualizado',

@@ -65,7 +65,7 @@ class AppointmentTest extends TestCase
         ]);
 
         $this->actingAs($this->user)
-            ->patchJson("/api/appointments/{$appointment->id}/cancel")
+            ->patchJson("/api/appointments/{$appointment->uuid}/cancel")
             ->assertOk()
             ->assertJsonPath('data.status', 'canceled');
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
+use App\Models\User;
 use App\Http\Resources\UserResource;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -20,27 +21,25 @@ class UserController extends Controller
     }
 
     // Retorna os dados do usuário autenticado
-    public function show(Request $request)
+    public function show(User $user)
     {
-        return new UserResource($request->user());
-    }
-
-    // Atualiza os dados do usuário autenticado
-    public function update(UserRequest $request)
-    {
-        $user = $this->service->update($request->user()->id, $request->validated());
         return new UserResource($user);
     }
 
-    // Deleta um usuário (opcional, se houver permissão)
-    public function destroy($id)
+    // Atualiza os dados do usuário autenticado
+    public function update(UserRequest $request, User $user)
     {
-        $userToDelete = $this->service->find($id);
+        $updatedUser = $this->service->update($user->id, $request->validated());
+        return new UserResource($updatedUser);
+    }
 
+    // Deleta um usuário (opcional, se houver permissão)
+    public function destroy(User $user)
+    {
         // Adicione sua lógica de autorização aqui. Ex:
-        // $this->authorize('delete', $userToDelete);
+        // $this->authorize('delete', $user);
 
-        $this->service->delete($userToDelete->id);
+        $this->service->delete($user->id);
         return response()->noContent();
     }
 }

@@ -53,7 +53,7 @@ services:
     image: redis:alpine
     container_name: smartschedule_redis
     ports:
-      - "6379:6379"
+      - "6378:6378"
     networks:
       - smartschedule_net
 
