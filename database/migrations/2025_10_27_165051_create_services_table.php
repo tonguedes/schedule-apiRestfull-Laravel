@@ -17,6 +17,7 @@ return new class extends Migration
             $table->uuid()->unique();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Adiciona a chave estrangeira para user
             $table->decimal('price', 10, 2);
             $table->integer('duration')->comment('Duration in minutes');
             $table->timestamps();

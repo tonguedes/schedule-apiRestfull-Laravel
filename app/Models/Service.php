@@ -2,44 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Service extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     protected $fillable = [
         'name',
         'description',
-        'price',
         'duration',
+        'price',
+        'uuid',
+        'user_id',
     ];
 
-    // Relacionamento com appointments
-    public function appointments()
-    {
-        return $this->hasMany(Appointment::class);
-    }
-
     /**
-     * Obtém a chave de rota para o modelo.
-     *
-     * @return string
+     * The "booted" method of the model.
      */
-    public function getRouteKeyName()
+    protected static function booted(): void
     {
-        return 'uuid';
-    }
-
-    /**
-     * Get the columns that should receive a unique identifier.
-     *
-     * @return array<int, string>
-     */
-    public function uniqueIds(): array
-    {
-        return ['uuid'];
+        static::creating(fn (Service $service) => $service->uuid = (string) Str::uuid());
     }
 }

@@ -3,50 +3,65 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ServiceRequest;
 use App\Http\Resources\ServiceResource;
-use App\Repositories\ServiceRepository;
+use App\Http\Requests\UpdateServiceRequest;
+use App\Http\Requests\StoreServiceRequest;
 use App\Models\Service;
+use Illuminate\Http\JsonResponse;
 
 class ServiceController extends Controller
 {
-    public function __construct(protected ServiceRepository $repository) {}
-
-    public function index()
+    /**
+     * Lista todos os serviços.
+     */
+    public function index(): JsonResponse
     {
-        return ServiceResource::collection($this->repository->all());
+        // Retorna os serviços do usuário autenticado
+        $services = auth()->user()->services()->get();
+        return response()->json(['data' => ServiceResource::collection($services)]);
     }
 
-   public function store(ServiceRequest $request)
+    /**
+     * Armazena um novo serviço.
+     */
+    public function store(StoreServiceRequest $request): ServiceResource
     {
-    // Mescla os dados validados com o ID do usuário autenticado
-    $data = [
-        ...$request->validated(),
-        'user_id' => $request->user()->id,
-    ];
+        $data = $request->validated();
+        $data['user_id'] = auth()->id();
 
-    $service = $this->repository->create($data);
+        $service = Service::create($data);
 
-    return new ServiceResource($service);
-    }
-
-
-    public function show(Service $service)
-    {
         return new ServiceResource($service);
     }
 
-    public function update(ServiceRequest $request, Service $service)
+    /**
+     * Mostra um serviço específico.
+     */
+    public function show(Service $service): ServiceResource
     {
-        // Adicione a lógica de autorização aqui, se necessário.
-        // $this->authorize('update', $service);
-        $updatedService = $this->repository->update($service->id, $request->validated());
-        return new ServiceResource($updatedService);
+        // Idealmente, você adicionaria uma verificação para garantir que o usuário pode ver este serviço
+        return new ServiceResource($service);
     }
 
-    public function destroy(Service $service)
+    /**
+     * Atualiza um serviço específico.
+     */
+    public function update(UpdateServiceRequest $request, Service $service): ServiceResource
     {
-        $this->repository->delete($service->id);
-        return response()->noContent();
+        // Idealmente, você adicionaria uma verificação para garantir que o usuário pode atualizar este serviço
+        $service->update($request->validated());
+
+        return new ServiceResource($service);
+    }
+
+    /**
+     * Deleta um serviço específico.
+     */
+    public function destroy(Service $service): JsonResponse
+    {
+        // Idealmente, você adicionaria uma verificação para garantir que o usuário pode deletar este serviço
+        $service->delete();
+
+        return response()->json(null, 204);
     }
 }
